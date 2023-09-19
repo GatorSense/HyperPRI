@@ -1,0 +1,39 @@
+{
+    "img_dir": "rgb_files",
+    "hsi_dir": "hsi_files",
+    "mask_dir": "mask_files",
+    "box43": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 43,
+        "phenotype": 1,
+        "dates": ["20220624"],
+        "weights": null
+    },
+    "box44": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 44,
+        "phenotype": 1,
+        "dates": ["20220624", "20220701", "20220708", "20220714", "20220721",
+                  "20220727", "20220806"],
+        "weights": null
+    },
+    "box49": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 49,
+        "phenotype": 1,
+        "dates": ["20220624"],
+        "weights": null
+    },
+    "box53": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 53,
+        "phenotype": 2,
+        "dates": ["20220624", "20220701", "20220708", "20220714", "20220721",
+                  "20220727", "20220806", "20220808"],
+        "weights": null
+    }
+}

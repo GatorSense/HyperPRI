@@ -1,0 +1,114 @@
+{
+    "img_dir": "rgb_files",
+    "hsi_dir": "hsi_files",
+    "mask_dir": "mask_files",
+    "box33": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 33,
+        "phenotype": 1,
+        "dates": ["20220624", "20220701", "20220708", "20220714", "20220721",
+                  "20220727", "20220806", "20220808", "20220810"],
+        "weights": null
+    },
+    "box34": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no":  34,
+        "phenotype": 1,
+        "dates": ["20220624", "20220701", "20220708", "20220714", "20220721", "20220727",
+                  "20220806", "20220808", "20220810", "20220815", "20220819", "20220821",
+                  "20220824"],
+        "weights": null
+    },
+    "box37": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 37,
+        "phenotype": 1,
+        "dates": ["20220624", "20220701", "20220714"],
+        "weights": null
+    },
+    "box44": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 44,
+        "phenotype": 1,
+        "dates": ["20220624", "20220701", "20220708", "20220714", "20220721",
+                "20220727", "20220806"],
+        "weights": null
+    },
+    "box49": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 49,
+        "phenotype": 2,
+        "dates": ["20220624"],
+        "weights": null
+    },
+    "box50": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 50,
+        "phenotype": 2,
+        "dates": ["20220624"],
+        "weights": null
+    },
+    "box51": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 51,
+        "phenotype": 2,
+        "dates": null,
+        "weights": null
+    },
+    "box52": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 52,
+        "phenotype": 2,
+        "dates": null,
+        "weights": null
+    },
+    "box53": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 53,
+        "phenotype": 2,
+        "dates": ["20220624", "20220701", "20220708", "20220714", "20220721",
+                "20220727", "20220806", "20220808"],
+        "weights": null
+    },
+    "box54": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 54,
+        "phenotype": 2,
+        "dates": ["20220624"],
+        "weights": null
+    },
+    "box58": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 58,
+        "phenotype": 2,
+        "dates": ["20220624"],
+        "weights": null
+    },
+    "box59": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 59,
+        "phenotype": 2,
+        "dates": ["20220624", "20220701", "20220714"],
+        "weights": null
+    },
+    "box64": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 64,
+        "phenotype": 2,
+        "dates": ["20220624"],
+        "weights": null
+    }
+}

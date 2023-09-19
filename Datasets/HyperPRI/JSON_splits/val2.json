@@ -1,0 +1,23 @@
+{
+    "img_dir": "rgb_files",
+    "hsi_dir": "hsi_files",
+    "mask_dir": "mask_files",
+    "box34": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no":  34,
+        "phenotype": 1,
+        "dates": ["20220624", "20220701", "20220708", "20220714", "20220721", "20220727",
+                  "20220806", "20220808", "20220810", "20220812", "20220815", "20220819",
+                  "20220821", "20220824"],
+        "weights": null
+    },
+    "box50": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 50,
+        "phenotype": 1,
+        "dates": ["20220624"],
+        "weights": null
+    }
+}

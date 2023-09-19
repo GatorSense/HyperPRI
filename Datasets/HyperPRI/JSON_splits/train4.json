@@ -1,0 +1,160 @@
+{
+    "img_dir": "rgb_files",
+    "hsi_dir": "hsi_files",
+    "mask_dir": "mask_files",
+    "box34": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no":  34,
+        "phenotype": 1,
+        "dates": ["20220624", "20220701", "20220708", "20220714", "20220721", "20220727",
+                  "20220806", "20220808", "20220810", "20220812", "20220815", "20220819",
+                  "20220821", "20220824"],
+        "weights": null
+    },
+    "box35": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 35,
+        "phenotype": 1,
+        "dates": ["20220701"],
+        "weights": null
+    },
+    "box36": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 36,
+        "phenotype": 1,
+        "dates": ["20220701"],
+        "weights": null
+    },
+    "box37": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 37,
+        "phenotype": 1,
+        "dates": ["20220624", "20220701", "20220714"],
+        "weights": null
+    },
+    "box38": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 38,
+        "phenotype": 1,
+        "dates": ["20220701"],
+        "weights": null
+    },
+    "box42": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 42,
+        "phenotype": 1,
+        "dates": ["20220624"],
+        "weights": null
+    },
+    "box43": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 43,
+        "phenotype": 1,
+        "dates": ["20220624"],
+        "weights": null
+    },
+    "box44": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 44,
+        "phenotype": 1,
+        "dates": ["20220624", "20220701", "20220708", "20220714", "20220721",
+                "20220727", "20220806"],
+        "weights": null
+    },
+    "box45": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 45,
+        "phenotype": 1,
+        "dates": ["20220624", "20220701"],
+        "weights": null
+    },
+    "box47": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 47,
+        "phenotype": 1,
+        "dates": ["20220624"],
+        "weights": null
+    },
+    "box49": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 49,
+        "phenotype": 2,
+        "dates": ["20220624"],
+        "weights": null
+    },
+    "box50": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 50,
+        "phenotype": 2,
+        "dates": ["20220624"],
+        "weights": null
+    },
+    "box54": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 54,
+        "phenotype": 2,
+        "dates": ["20220624"],
+        "weights": null
+    },
+    "box55": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 55,
+        "phenotype": 2,
+        "dates": ["20220624"],
+        "weights": null
+    },
+    "box56": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 56,
+        "phenotype": 2,
+        "dates": ["20220624", "20220701", "20220714"],
+        "weights": null
+    },
+    "box57": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 57,
+        "phenotype": 2,
+        "dates": ["20220624"],
+        "weights": null
+    },
+    "box58": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 58,
+        "phenotype": 2,
+        "dates": ["20220624"],
+        "weights": null
+    },
+    "box59": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 59,
+        "phenotype": 2,
+        "dates": ["20220624", "20220701", "20220714"],
+        "weights": null
+    },
+    "box64": {
+        "plant_folder": "Peanut",
+        "resolution": "968x608",
+        "box_no": 64,
+        "phenotype": 2,
+        "dates": ["20220624"],
+        "weights": null
+    }
+}
