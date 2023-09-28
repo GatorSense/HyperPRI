@@ -1,16 +1,10 @@
 """
-File composed of all the necessary PyTorch parts to create UNET, JOSHUA, etc.
-
-PrmiUnet model model parts code
-https://github.com/jaxony/unet-pytorch.
+File composed of all the necessary PyTorch parts to create UNET, etc.
 
 U-Net model parts code
 https://github.com/milesial/Pytorch-UNet
 
-JOSHUA/JOSHUA+ model parts code
-https://github.com/GatorSense/Histological_Segmentation
-
-@author: chang.spencer
+@author: changspencer
 """
 import torch
 import torch.nn as nn

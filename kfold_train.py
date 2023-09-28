@@ -49,9 +49,9 @@ model_list = {
 }
 
 plant_metadata = {
-    'train': f"{rel_call_path}/Datasets/HyperPRI/JSON_splits/train1.json",
-    'val': f"{rel_call_path}/Datasets/HyperPRI/JSON_splits/val1.json",
-    'test': f"{rel_call_path}/Datasets/HyperPRI/JSON_splits/val1.json"
+    'train': f"{rel_call_path}/Datasets/HyperPRI/data_splits/train1.json",
+    'val': f"{rel_call_path}/Datasets/HyperPRI/data_splits/val1.json",
+    'test': f"{rel_call_path}/Datasets/HyperPRI/data_splits/val1.json"
 }
 
 train_params = {
@@ -146,9 +146,9 @@ for run in range(start_run, train_params['splits']):
 
     # Change which dataset we're using for k-fold
     train_params['json_dir'] = {
-        'train': f"{rel_call_path}/Datasets/HyperPRI/JSON_splits/train{run+1}.json",
-        'val': f"{rel_call_path}/Datasets/HyperPRI/JSON_splits/val{run+1}.json",
-        'test': f"{rel_call_path}/Datasets/HyperPRI/JSON_splits/val{run+1}.json"
+        'train': f"{rel_call_path}/Datasets/HyperPRI/data_splits/train{run+1}.json",
+        'val': f"{rel_call_path}/Datasets/HyperPRI/data_splits/val{run+1}.json",
+        'test': f"{rel_call_path}/Datasets/HyperPRI/data_splits/val{run+1}.json"
     }
 
     print(train_params['json_dir'])

@@ -1,12 +1,12 @@
 """
 File composed of all learning models' class declarations.
 
-@author: ?
+Takes after previous code by jpeeples67 in https://github.com/GatorSense/Histological_Segmentation
+
+@author: changspencer
 """
-import numpy as np
 
 ## PyTorch dependencies
-from torchvision import models
 import torch.nn as nn
 import torch.nn.functional as F
 import torch
@@ -24,6 +24,10 @@ class UNet(nn.Module):
     def __init__(self, n_channels, n_classes, bilinear=True,
                  feature_extraction = False, use_attention = False,
                  analyze=False):
+        """
+        Initialize a standard UNET with multiple other options.
+
+        """
         super(UNet, self).__init__()
         self.n_channels = n_channels
         self.n_classes = n_classes
@@ -63,7 +67,12 @@ class UNet(nn.Module):
 
 
 class SpectralUNET(torch.nn.Module):
-    def __init__(self, hsi_depth, n_classes, bn_feats=16):
+    def __init__(self, hsi_depth, n_classes, bn_feats=16, bnorm=True):
+        """
+        MLP Autoencoder architecture that is UNET-like.
+            Its current implementation utilizes a single learned layer size
+            across all encoder-decoder layers.
+        """
         super(SpectralUNET, self).__init__()
 
         self.hsi_depth = hsi_depth
@@ -72,22 +81,22 @@ class SpectralUNET(torch.nn.Module):
 
         self.layer_feats = [
             bn_feats,
-            bn_feats, # * 2,
-            bn_feats, #  * 4,
-            bn_feats, # * 8,
-            bn_feats, # * 16,
+            bn_feats,
+            bn_feats,
+            bn_feats,
+            bn_feats,
         ]
 
-        self.tail = self._basic_module(hsi_depth, self.layer_feats[-1])
-        self.down1 = self._basic_module(self.layer_feats[-1], self.layer_feats[-2])
-        self.down2 = self._basic_module(self.layer_feats[-2], self.layer_feats[-3])
-        self.down3 = self._basic_module(self.layer_feats[-3], self.layer_feats[-4])
-        self.down4 = self._basic_module(self.layer_feats[-4], bn_feats)
-        self.up1 = self._basic_module(bn_feats, self.layer_feats[-4])   # starts with down4
-        self.up2 = self._basic_module(2*self.layer_feats[-3], self.layer_feats[-3])  # concat's with down3
-        self.up3 = self._basic_module(2*self.layer_feats[-2], self.layer_feats[-2])  # concat's with down2
-        self.up4 = self._basic_module(2*self.layer_feats[-1], self.layer_feats[-1])  # concat's with down1
-        self.outc = torch.nn.Linear(2*bn_feats, # * 32,
+        self.tail = self._basic_module(hsi_depth, self.layer_feats[-1], bn=bnorm)
+        self.down1 = self._basic_module(self.layer_feats[-1], self.layer_feats[-2], bn=bnorm)
+        self.down2 = self._basic_module(self.layer_feats[-2], self.layer_feats[-3], bn=bnorm)
+        self.down3 = self._basic_module(self.layer_feats[-3], self.layer_feats[-4], bn=bnorm)
+        self.down4 = self._basic_module(self.layer_feats[-4], bn_feats, bn=bnorm)
+        self.up1 = self._basic_module(bn_feats, self.layer_feats[-4], bn=bnorm)   # starts with down4
+        self.up2 = self._basic_module(2*self.layer_feats[-3], self.layer_feats[-3], bn=bnorm)  # concat's with down3
+        self.up3 = self._basic_module(2*self.layer_feats[-2], self.layer_feats[-2], bn=bnorm)  # concat's with down2
+        self.up4 = self._basic_module(2*self.layer_feats[-1], self.layer_feats[-1], bn=bnorm)  # concat's with down1
+        self.outc = torch.nn.Linear(2*bn_feats,
                                     self.n_classes) # concat's with "flattened" tail
 
     def _basic_module(self, in_feats, out_feats, bn=True):
@@ -125,24 +134,10 @@ class SpectralUNET(torch.nn.Module):
             x4 = self.down4(x3)
             
             tmp_x = self.up1(x4)
-            # del x4
             tmp_x = self.up2(torch.cat((x3, tmp_x), axis=-1))
-            # del x3
             tmp_x = self.up3(torch.cat((x2, tmp_x), axis=-1))
-            # del x2
             tmp_x = self.up4(torch.cat((x1, tmp_x), axis=-1))
-            # del x1
             tmp_x = self.outc(torch.cat((x0, tmp_x), axis=-1))
-            # del x0
-            # tmp_x = self.up1(x4)
-            # tmp_x = torch.cat((x3, tmp_x), axis=-1)
-            # tmp_x = self.up2(tmp_x)
-            # tmp_x = torch.cat((x2, tmp_x), axis=-1)
-            # tmp_x = self.up3(tmp_x)
-            # tmp_x = torch.cat((x1, tmp_x), axis=-1)
-            # tmp_x = self.up4(tmp_x)
-            # tmp_x = torch.cat((x0, tmp_x), axis=-1)
-            # tmp_x = self.outc(tmp_x)
             out_x[idx] = tmp_x.reshape(self.n_classes, x_row, x_col)
         return out_x
 
@@ -151,6 +146,11 @@ class CubeNET(torch.nn.Module):
     def __init__(self, hsi_depth, n_classes, first_depth=64,
                  bilinear=True, use_attention=False,
                  analyze=False):
+        """
+        A UNET that begins first with a 3D convolutional layer.
+            After the first 3D convolutional layer to grab all
+            hyperspectral bands, the architecture is the same as the UNET.
+        """
         super(CubeNET, self).__init__()
 
         self.n_channels = 1
@@ -235,8 +235,6 @@ class CubeNET(torch.nn.Module):
             return logits
 
 
-
-
 def initialize_model(model_name, num_classes, Network_parameters, analyze=False):
     """
     Initializes model based on given model name string and provided parameters
@@ -263,13 +261,13 @@ def initialize_model(model_name, num_classes, Network_parameters, analyze=False)
     else: #Show error that segmentation model is not available
         raise RuntimeError('Invalid model')
 
-
     return model
 
 
 def translate_load_dir(model_name, net_params):    #Generate segmentation model
     """
-    Translate the 
+    Translate the model name into a directory path that can be used when cross-validating
+        multiple models.
     """
     if model_name == 'SpectralUNET':
         model_str = f"{model_name}_{net_params['spectral_bn_size']}"

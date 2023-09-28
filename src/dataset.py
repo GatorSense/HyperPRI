@@ -1,16 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-This pytorch custom dataset was modified from code in this repository:
-https://github.com/jeromerony/survey_wsl_histology. Please cite their work:
-    
-@article{rony2019weak-loc-histo-survey,
-  title={Deep weakly-supervised learning methods for classification and localization in histology images: a survey},
-  author={Rony, J. and Belharbi, S. and Dolz, J. and Ben Ayed, I. and McCaffrey, L. and Granger, E.},
-  journal={coRR},
-  volume={abs/1909.03354},
-  year={2019}
-}
-@author: jpeeples 
+Takes after previous code by jpeeples67 in https://github.com/GatorSense/Histological_Segmentation
+
+@author: changspencer
 """
 import os
 import json
@@ -45,7 +37,6 @@ class HyperpriDataset(Dataset):
         self.class_list = [
             'Peanut',
             'SweetCorn',
-            'Coffee'
         ]
         if subset is not None:
             self.class_list = subset
@@ -94,14 +85,16 @@ class HyperpriDataset(Dataset):
         '''
         Usual way of going through file directories and pulling out the
             data in a particular folder
+
+        # TODO - Update for HyperPRI release
+            - HyperPRI --> rgb_files/hsi_files/mask_files instead of pulling based on class
+            - Pull all filenames within a given directory
+            - Remove Class counter
         '''
         self.class_count = np.zeros(len(self.class_list), dtype=np.int)
         imgdir = os.path.join(self.root, 'images')
     
         for os_root, dirs, files in os.walk(imgdir):
-            if os_root.find("_noMask") > -1:
-                continue
-
             curr_class_idx = None
             for class_idx in range(len(self.class_list)):
                 if self.class_list[class_idx] in os_root:
@@ -111,22 +104,22 @@ class HyperpriDataset(Dataset):
             # The subset of classes does not include 'os_root'
             if curr_class_idx is None:
                 continue
-
             if self.mode.lower() == 'hsi':
                 if len(files) > 0:
                     basename = files[0].rsplit('.', 1)[0]
                     namepath = os.path.join(os_root, basename)
+                    hdr_path = os.path.join(os_root, "hinalea_hsi.hdr")
 
                     rootp = pathlib.Path(os_root)
                     index = rootp.parts.index('images')
                     basename_idx = rootp.parts.index(basename)
                     # Only take the next folder after masks_pixel_gt for GT masks
-                    labelpath = os.path.join(self.root, 'masks_pixel_gt', *rootp.parts[index+1:basename_idx])
+                    labelpath = os.path.join(self.root, 'mask_files', *rootp.parts[index+1:basename_idx])
                     labelpath = os.path.join(labelpath, f"{basename}_mask.png")
 
                     # Data existence validation
-                    if not os.path.exists(f"{namepath}.hdr"):
-                        FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), f"{namepath}.hdr")
+                    if not os.path.exists(f"{hdr_path}"):
+                        FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), f"{hdr_path}")
                     if not os.path.exists(f"{namepath}.dat"):
                         FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), f"{namepath}.dat")
                     if not os.path.exists(labelpath):
@@ -135,7 +128,7 @@ class HyperpriDataset(Dataset):
                     # Label name validation
                     self.files.append({
                         "img": f"{namepath}.png",
-                        "hdr": f"{namepath}.hdr",
+                        "hdr": f"{hdr_path}",
                         "dat": f"{namepath}.dat",
                         "label": labelpath
                     })
@@ -147,7 +140,7 @@ class HyperpriDataset(Dataset):
 
                     rootp = pathlib.Path(os_root)
                     index = rootp.parts.index('images')
-                    labelpath = os.path.join(self.root, 'masks_pixel_gt', *rootp.parts[index+1:])
+                    labelpath = os.path.join(self.root, 'mask_files', *rootp.parts[index+1:])
                     labelpath = os.path.join(labelpath, f"{name.rsplit('.', 1)[0]}_mask.png")
 
                     # Label name validation
@@ -166,12 +159,19 @@ class HyperpriDataset(Dataset):
 
     def _parse_json_file(self, json_path, verbose=False):
         '''
-            "plant_folder": "Peanut",
-            "resolution": "968x608",
-            "box_no":  34,
-            "phenotype": 1,
-            "dates": ["20220624", "20220701", "20220708"],
-            "weights": null
+            This function parses a given JSON path to determine where
+                certain rhizoboxes may be stored on your personal computer. Any
+                files found in the JSON file and in the directories noted below
+                will be added to this dataset object's list of loadable files.
+
+            See the provided JSON files for the proper format per
+                plant rhizobox.
+        Args:
+            json_path: str full path to a desired JSON file.
+            verbose: bool flag that indicates when certain files were not found
+                though listed in provided JSON file detailed by `json_path`.
+        Returns:
+            None
         '''
         with open(json_path, 'r') as f:
             data_dict = json.load(f)
@@ -272,7 +272,7 @@ class HyperpriDataset(Dataset):
             img = torch.tensor(img)
 
         label_file = datafiles["label"]
-        label = Image.open(label_file)
+        label = Image.open(label_file).convert("L")
 
         # PIL Images and Tensors are transposes of each other, apparently
         if self.mode.lower() != 'hsi' and img.size[0] < img.size[1]:

@@ -2,33 +2,29 @@
 """
 Created on Fri Jan 22 14:46:58 2021
 
-@author: jpeeples
+Takes after previous code by jpeeples67 in https://github.com/GatorSense/Histological_Segmentation
+
+@author: changspencer
 """
 ## Python standard libraries
 from __future__ import print_function
 import os
-from collections import OrderedDict
-from copy import deepcopy
-import logging
 
 from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
-# from matplotlib import cm
-# from PIL import Image
 from sklearn.metrics import jaccard_score as jsc
-from sklearn.metrics import roc_curve, precision_recall_curve, average_precision_score, confusion_matrix
+from sklearn.metrics import precision_recall_curve, average_precision_score, confusion_matrix
 
 ## PyTorch dependencies
 import torch
 import torch.nn as nn
 from torchvision import utils
 
+## Local external libraries
 from .create_dataloaders import Get_Dataloaders
 from .models import initialize_model, translate_load_dir
-from .metrics import Average_Metric, pr_counts, score_counter
-
-## Local external libraries
+from .metrics import Average_Metric
 
 
 METRICS_DICT = {
@@ -47,6 +43,21 @@ METRICS_DICT = {
 }
 
 def compute_metrics(input, target, metrics_list=None, pos_wgt=None):
+    """
+    Computes metrics as determined by the `metrics_list` and what the
+        called `Average_Metric` function can handle.
+    Args:
+        input: array representing the predicted labels for pixels in the original
+            images. May be any kind of array that works with `target` but is meant to
+            be a learning model's predictions.
+        target: array representing the true labels for pixels in `input`
+        metrics_list: list of str detailing names of metrics that correspond to
+            metrics computed withing `Average_Metric` below.
+        pos_wgt: Unused, but originally meant for biasing weight toward positive classes
+            due to the imbalanced set of root-soil labels in HyperPRI.
+    Returns:
+        list containing float values for all desired metrics averaged over the size of input
+    """
     all_metrics = list(METRICS_DICT.keys())
     metric_results = {}
 
@@ -56,12 +67,6 @@ def compute_metrics(input, target, metrics_list=None, pos_wgt=None):
                                                     target.float(),
                                                     metric_name=METRICS_DICT[metric])
     return metric_results
-
-
-def inverse_normalize(tensor, mean=(0,0,0), std=(1,1,1)):
-    for t, m, s in zip(tensor, mean, std):
-        t.mul_(s).add_(m)
-    return tensor
 
 
 def eval_models(seg_models, dataloaders, mask_type, device, split, params,
@@ -76,11 +81,18 @@ def eval_models(seg_models, dataloaders, mask_type, device, split, params,
         mask_type: dtype of the ground truth values
         device: PyTorch object for device
         split: int of which run or training split to put the saved files
+        params: dict containing a copy of the experimental parameters.
+        eval_name: str indicating what to name the figure-saving directory
+        save_dir: str that is the full path to contain the figure-saving directory determined
+            by `eval_name`
         thresholds: list of floats that correspond to the segmentation threshold
             for each evaluated model. If None, set all to 0.5.
         metrics_logged: list of str the say what metrics should be computed
+        save_mask_png: bool flag that indicates whether we should save the masked RGB/HS image
+        roc_pr: bool flag that indicates whether to create the precision-recall curve and
+            compute its average precision.
     Returns:
-        metrics: dict of dict's with metrics' average results across a single split/run
+        dict of dict's with metrics' average results across a single split/run
     '''
     # Default metrics are all possible metrics (full names)
     if metrics_logged is None:
@@ -88,8 +100,6 @@ def eval_models(seg_models, dataloaders, mask_type, device, split, params,
             'Precision',
             'Recall',
             'F1-Score',
-            # 'Mean Average Precision',
-            # 'Hausdorff',
             'Jaccard',
             'Adjusted Rand',
             'IOU All',
@@ -116,9 +126,7 @@ def eval_models(seg_models, dataloaders, mask_type, device, split, params,
         with open(save_file, 'w') as f:
             f.write(f"Evaluating models with thresholds: {thresholds}\n\n")
 
-            # Initialize the segmentation model for this run
-    # TODO - Refactor code to be more like the model_pr_stats function below,
-    # TODO -    except for segmentation masks instead of PR curves
+    # Initialize the segmentation model for this run
     for key_idx, model_name in enumerate(seg_models.keys()):
 
         temp_dataloaders = dataloaders[model_name]
@@ -161,10 +169,8 @@ def eval_models(seg_models, dataloaders, mask_type, device, split, params,
                     # Create Segmentation folders
                     if not os.path.exists(folder):
                         os.makedirs(folder)
-                    if params['dataset'].lower() == 'hyperpri':
-                        means = np.expand_dims(np.array([0.2870, 0.2238, 0.1639]), axis=(1, 2))
-                        devs = np.expand_dims(np.array([0.0975, 0.0914, 0.0713]), axis=(1, 2))
-                        color_correction = (img.cpu() * devs) + means
+                    if params['dataset'].lower() == 'hyperpri':  # RGB Data
+                        color_correction = img.cpu()
                     else:
                         hsi_rgb = [150, 72, 18]  # R - 700nm, G - 546nm, B - 436nm
                         color_correction = img[hsi_rgb, :, :]**(1 / 2.2)  # Gamma correction
@@ -173,7 +179,6 @@ def eval_models(seg_models, dataloaders, mask_type, device, split, params,
                     pred_mask = (pred_segmap > thresholds[key_idx]).float()
                     saved_map = (pred_mask.cpu() * color_correction).squeeze()
                     utils.save_image(saved_map, img_name + "_pred.png")
-                # torch.save(pred_segmap.to(torch.uint8).clone().squeeze(0), img_name + ".pt")
 
                 if len(my_preds[model_name]) == 0:
                     true_vals[model_name] = target.cpu().flatten().float().numpy()  # Det. random state could decr MEMREQ here
@@ -187,7 +192,7 @@ def eval_models(seg_models, dataloaders, mask_type, device, split, params,
                 # EVAL the prediction mask with various metrics
                 pred_segmap = (pred_segmap > thresholds[key_idx]).float()
                 eval_results = compute_metrics(pred_segmap, target, metrics_list=metrics_logged)
-                if save_mask_png:
+                if save_mask_png:   #? Deprecated?
                     # Wipe the old file make a new one...
                     with open(save_file, 'a') as f:
                         f.write(f"{model_name} - {idx[img_idx]} - ")
@@ -260,10 +265,16 @@ def model_pr_stats(seg_models, rel_call_path, mask_type, device, params,
             curve computation is automated by Scikit-Learn.
     Args:
         seg_models: dict of PyTorch model references where keys are their names
-        dataloaders: dict of dataloaders where keys are model names (use train/validation data only)
+        rel_call_path: str of the full path to the file that called this function. Ideally,
+            this is the HyperPRI git repo directory.
         mask_type: dtype of the ground truth values
         device: PyTorch object for device
-        split: int of which run or training split to put the saved files
+        params: dict containing a copy of the experimental parameters.
+        save_dir: str that is the full path to contain the figure-saving directory determined
+            by `eval_name`
+        save_mask_png: bool flag that indicates whether we should save the masked RGB/HS image
+        thresholds: list of floats that correspond to the segmentation threshold
+            for each evaluated model. If None, sets all to 0.5.
         metrics_logged: list of str the say what metrics should be computed
     Returns:
         metrics: dict of dict's with metrics' average results across a single split/run
@@ -305,9 +316,9 @@ def model_pr_stats(seg_models, rel_call_path, mask_type, device, params,
 
         # Change which dataset we're using for k-fold
         params['json_dir'] = {
-            'train': f"{params['imgs_dir']}/JSON_splits/train{run+1}.json",
-            'val': f"{params['imgs_dir']}/JSON_splits/val{run+1}.json",
-            'test': f"{params['imgs_dir']}/JSON_splits/val{run+1}.json"
+            'train': f"{params['imgs_dir']}/data_splits/train{run+1}.json",
+            'val': f"{params['imgs_dir']}/data_splits/val{run+1}.json",
+            'test': f"{params['imgs_dir']}/data_splits/val{run+1}.json"
         }
         
         print("\n*******************************")

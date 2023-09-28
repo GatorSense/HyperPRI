@@ -42,9 +42,9 @@ model_list = {
 }
 
 plant_metadata = {
-    'train': f"{rel_call_path}/Datasets/HyperPRI/JSON_splits/train1.json",
-    'val': f"{rel_call_path}/Datasets/HyperPRI/JSON_splits/val1.json",
-    'test': f"{rel_call_path}/Datasets/HyperPRI/JSON_splits/val1.json"
+    'train': f"{rel_call_path}/Datasets/HyperPRI/data_splits/train1.json",
+    'val': f"{rel_call_path}/Datasets/HyperPRI/data_splits/val1.json",
+    'test': f"{rel_call_path}/Datasets/HyperPRI/data_splits/val1.json"
 }
 
 validate_params = {
