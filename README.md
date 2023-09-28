@@ -1,15 +1,15 @@
 # HyperPRI
-HyperPRI - Hyperspectral Plant Root Imagery
+HyperPRI - **Hyper**spectral **P**lant **R**oot **I**magery
 
 This Github Repo contains source code used to demonstrate how the hyperspectral data included within the HyperPRI dataset improves binary segmentation performance for a deep learning segmentation model.
 
 DataDryad Links:
-- Peanut (used by this repo): (URL HERE)
-- Sweet Corn: (URL HERE)
+- [Peanut (Arachis hypogaea) Data](https://doi.org/10.5061/dryad.xksn02vmg)
+- [Sweet Corn (_Zea mays_) Data](https://doi.org/10.5061/dryad.t76hdr868)
 
 Preprint: (URL HERE)
 
-Introductory Dataset Video: (URL HERE)
+YouTube: [Dataset Video](https://youtu.be/T1D1MBxySlI)
 
 ## Why use the HyperPRI dataset?
 Data in HyperPRI **enhances plant science analyses** and provides **challenging features for machine learning** models.
@@ -36,7 +36,7 @@ There are a number of related CV tasks for this dataset:
   - Includes annotations for peanut nodules and pegs
 - Box weights at each time stamp
   - Baseline Measurements: Empty box, dry soil, wet soil
-- 32 Peanut (Arachis hypogaea) rhizoboxes – 344 images
+- 32 Peanut (Arachis hypogaea) rhizoboxes – 358 images
 - 32 Sweet Corn (Zea mays) rhizoboxes – 390 images
 
 # Methodology and Performance - Summary
