@@ -3,11 +3,13 @@ HyperPRI - **Hyper**spectral **P**lant **R**oot **I**magery
 
 This Github Repo contains source code used to demonstrate how the hyperspectral data included within the HyperPRI dataset improves binary segmentation performance for a deep learning segmentation model.
 
-DataDryad Links:
+==This code's public release is a work-in-progress and will be cleaned up following submissions to bioRxiv and Elsevier's COMPAG journal==
+
+DataDryad Links: (Pending approval on DataDryad)
 - [Peanut (Arachis hypogaea) Data](https://doi.org/10.5061/dryad.xksn02vmg)
 - [Sweet Corn (_Zea mays_) Data](https://doi.org/10.5061/dryad.t76hdr868)
 
-Preprint: (URL HERE)
+Preprint: [bioRxiv 2023.09.29.559614](https://www.biorxiv.org/content/10.1101/2023.09.29.559614v1)
 
 YouTube: [Dataset Video](https://youtu.be/T1D1MBxySlI)
 
