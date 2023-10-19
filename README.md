@@ -5,11 +5,9 @@ This Github Repo contains source code used to demonstrate how the hyperspectral 
 
 ==This code's public release is a work-in-progress and will be cleaned up following submissions to bioRxiv and Elsevier's COMPAG journal==
 
-DataDryad Links: (Pending approval on DataDryad)
-- [Peanut (Arachis hypogaea) Data](https://doi.org/10.5061/dryad.xksn02vmg)
-- [Sweet Corn (_Zea mays_) Data](https://doi.org/10.5061/dryad.t76hdr868)
+[HyperPRI Dataset](https://doi.org/10.7910/DVN/MAYDHT) (Available as of Oct-15-2023)
 
-Preprint: [bioRxiv 2023.09.29.559614](https://www.biorxiv.org/content/10.1101/2023.09.29.559614v1)
+Preprint: [bioRxiv 2023.09.29.559614](https://doi.org/10.1101/2023.09.29.559614)
 
 YouTube: [Dataset Video](https://youtu.be/T1D1MBxySlI)
 
