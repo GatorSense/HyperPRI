@@ -119,11 +119,11 @@ class HyperpriDataset(Dataset):
 
                     # Data existence validation
                     if not os.path.exists(f"{hdr_path}"):
-                        FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), f"{hdr_path}")
+                        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), f"{hdr_path}")
                     if not os.path.exists(f"{namepath}.dat"):
-                        FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), f"{namepath}.dat")
+                        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), f"{namepath}.dat")
                     if not os.path.exists(labelpath):
-                        FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), labelpath)
+                        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), labelpath)
 
                     # Label name validation
                     self.files.append({
@@ -197,11 +197,11 @@ class HyperpriDataset(Dataset):
 
                 if self.mode.lower() == 'hsi':
                     hsi_dir = f"{self.root}/{box_class}_{box_sz}/{data_dict['hsi_dir']}/"
-                    hdrpath = os.path.join(f"{hsi_dir}/hinalea_hsi.hdr")
+                    hdrpath = os.path.join(hsi_dir, "hinalea_hsi.hdr")
 
                     dat_name = f"{basename}.dat"
                     imgpath = os.path.join(f"{img_dir}", img_name)
-                    datpath = os.path.join(f"{hsi_dir}/{basename}", dat_name)
+                    datpath = os.path.join(f"{hsi_dir}", dat_name)
                     labelpath = os.path.join(f"{label_dir}", mask_name)
                     logging.info(hdrpath)
 

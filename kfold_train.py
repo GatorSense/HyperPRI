@@ -59,7 +59,7 @@ if __name__ == "__main__":
     n_seeds = 1
     start_split = 0
     num_splits = 5   # Assuming multiple splits
-    dataset = "RGB"
+    dataset = "HSI"
 
     print("\n ~~~~~~~~~~ 5-SPLIT CYCLES ~~~~~~~~~~\n")
     if MODEL_SHARD:

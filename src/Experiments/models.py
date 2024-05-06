@@ -32,7 +32,7 @@ class UNet(nn.Module):
         self.analyze = analyze
         factor = 2 if bilinear else 1
 
-        starter_dim = 4
+        starter_dim = 64
         out1 = starter_dim * 2
         out2 = starter_dim * 2**2
         out3 = starter_dim * 2**3
@@ -178,24 +178,26 @@ class CubeNET(torch.nn.Module):
             torch.nn.BatchNorm2d(first_depth),
             torch.nn.ReLU(inplace=True),
         )
-        self.down1 = Down(first_depth, 128)
-        self.down2 = Down(128, 256)
-        self.down3 = Down(256, 512)
-        self.down4 = Down(512, 1024 // factor)
+        C = 128
 
-        self.up1 = Up(1024, 512, self.bilinear, use_attention=self.use_attention)
-        self.up2 = Up(512, 256, self.bilinear, use_attention=self.use_attention)
-        self.up3 = Up(256, 128, self.bilinear, use_attention=self.use_attention)
+        self.down1 = Down(first_depth, C)
+        self.down2 = Down(C, C * 2)
+        self.down3 = Down(C * 2, C * 2**2)
+        self.down4 = Down(C * 2**2, C * 2**3 // factor)
+
+        self.up1 = Up(C * 2**3, C * 2**2, self.bilinear, use_attention=self.use_attention)
+        self.up2 = Up(C * 2**2, C * 2, self.bilinear, use_attention=self.use_attention)
+        self.up3 = Up(C * 2, C, self.bilinear, use_attention=self.use_attention)
         if first_depth == 64:
-            self.up4 = Up(128, 64 * factor, self.bilinear, use_attention=self.use_attention)
+            self.up4 = Up(C, 64 * factor, self.bilinear, use_attention=self.use_attention)
         else:
             if self.bilinear:
                 self.upsample4 = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
-                self.upconv4 = DoubleConv(128 + first_depth, 64, 64)
+                self.upconv4 = DoubleConv(C + first_depth, 64, 64)
             else:
-                self.upsample4 = nn.ConvTranspose2d(128, 64, kernel_size=2, stride=2)
+                self.upsample4 = nn.ConvTranspose2d(C, 64, kernel_size=2, stride=2)
                 self.upconv4 = DoubleConv(64 + first_depth, 64)
-        self.outc = OutConv(64, n_classes)
+        self.outc = OutConv(64, self.n_classes)
 
     def forward(self, x):
         """
