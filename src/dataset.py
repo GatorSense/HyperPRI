@@ -197,11 +197,10 @@ class HyperpriDataset(Dataset):
 
                 if self.mode.lower() == 'hsi':
                     hsi_dir = f"{self.root}/{box_class}_{box_sz}/{data_dict['hsi_dir']}/"
+                    hdrpath = os.path.join(f"{hsi_dir}/hinalea_hsi.hdr")
 
-                    hdr_name = f"{basename}.hdr"
                     dat_name = f"{basename}.dat"
                     imgpath = os.path.join(f"{img_dir}", img_name)
-                    hdrpath = os.path.join(f"{hsi_dir}/{basename}", hdr_name)
                     datpath = os.path.join(f"{hsi_dir}/{basename}", dat_name)
                     labelpath = os.path.join(f"{label_dir}", mask_name)
                     logging.info(hdrpath)
