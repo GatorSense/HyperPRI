@@ -59,7 +59,7 @@ if __name__ == "__main__":
     n_seeds = 1
     start_split = 0
     num_splits = 5   # Assuming multiple splits
-    dataset = "RGBPRI"
+    dataset = "RGB"
 
     print("\n ~~~~~~~~~~ 5-SPLIT CYCLES ~~~~~~~~~~\n")
     if MODEL_SHARD:
@@ -74,7 +74,7 @@ if __name__ == "__main__":
             print(f"        Seed {seed_idx+1} / {n_seeds}.....")
             os.system("nvidia-smi")
 
-            if dataset.lower() == 'rgbpri':
+            if dataset.lower() == 'rgb':
                 exp_params = ExpRedGreenBluePRI(rel_call_path, split_no=run+1, seed_num=seed_idx,
                                                 augment=DATA_AUG, comet_logging=online_comet)
             else:
