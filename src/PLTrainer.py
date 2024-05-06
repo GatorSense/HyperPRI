@@ -106,13 +106,6 @@ class RootLightningModel(pl.LightningModule):
         self.log('tr_dice', dice, on_step=False, on_epoch=True, sync_dist=False, prog_bar=True)
         self.log('tr_pos_iou', pos_iou, on_step=False, on_epoch=True, sync_dist=False, prog_bar=False)
 
-        plot_flag = self.init_hist_by_train and (self.current_epoch + 1) == self.init_ep
-        plot_flag = plot_flag or (self.hist_plot_ep > 0 and (self.current_epoch + 1) % self.hist_plot_ep == 0)
-        if plot_flag and self.batches_for_hist > 0:
-            self.batches_for_hist -= 1
-            self.train_batches.append(batch['image'])    # No need to return the loss as it's logged above.
-            self.train_labels.append(batch['mask'])
-
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -210,15 +203,6 @@ def consolidate_deepspeed_two(ckpt_path):
                 #!     perhaps because it wasn't called in the forward loop.
                 continue
 
-            if "hist_pool" in new_key or "hist_attn" in new_key:  # Duplicate for HistPools
-                key_arr = new_key.split(".")
-                copy_key = None
-                if "centers" == key_arr[-1]:
-                    copy_key = ".".join(key_arr[:2] + ["bin_centers_conv.bias"])
-                elif "widths" == key_arr[-1]:
-                    copy_key = ".".join(key_arr[:2] + ["bin_widths_conv.weight"])
-                if copy_key:
-                    state_dict[copy_key] = dszero_state_dict[key_wgt]
             state_dict[new_key] = dszero_state_dict[key_wgt]
     else:
         state_dict = None
@@ -633,7 +617,6 @@ def test_net(test_data, params, best_threshold, pl_trainer=None, save_segmaps=Fa
         pl_trainer = pl.Trainer(accelerator=params.device, devices=1, inference_mode=True)
     
     # Assumed to be after a training cycle
-    pl_model.init_hist_by_train = False
     preds = pl_trainer.predict(pl_model, test_loader, return_predictions=True)
 
     # Produce the plots...

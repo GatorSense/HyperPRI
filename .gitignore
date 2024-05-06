@@ -1,2 +1,6 @@
-src/__pycache__/*
-Datasets/HyperPRI/*
+__pycache__/
+
+Datasets/
+Saved_Models/
+lightning_logs/
+comet_offline/

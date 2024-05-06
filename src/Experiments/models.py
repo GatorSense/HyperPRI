@@ -32,7 +32,7 @@ class UNet(nn.Module):
         self.analyze = analyze
         factor = 2 if bilinear else 1
 
-        starter_dim = 64
+        starter_dim = 4
         out1 = starter_dim * 2
         out2 = starter_dim * 2**2
         out3 = starter_dim * 2**3

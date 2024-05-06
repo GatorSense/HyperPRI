@@ -24,7 +24,7 @@ class ExpRedGreenBluePRI:
         self.dataset = "RGB"
         self.b_size  = {'train': 2, 'val': 2, 'test': 1}
         self.device  = 'gpu'
-        self.epochs  = 5000
+        self.epochs  = 500
 
         # Dataset Definitions ---------------------------------------------
         self.patch_size  = (608, 968)
@@ -70,7 +70,7 @@ class ExpRedGreenBluePRI:
 
         # Early Stopping parameters ---------------------------------------
         self.consecutive = None
-        self.overall     = 500
+        self.overall     = 50
 
         # Visualization parameters ----------------------------------------
         self.model_param_str = self.translate_load_dir()
@@ -177,7 +177,7 @@ class ExpHyperspectralPRI:
         self.dataset = "HSI_SitS"
         self.b_size  = {'train': 2, 'val': 2, 'test': 2}
         self.device  = 'gpu'
-        self.epochs  = 5000
+        self.epochs  = 500
 
         # Dataset Definitions - largest size is 267 MB
         self.patch_size  = (608, 968)
@@ -232,7 +232,7 @@ class ExpHyperspectralPRI:
         
         # Early Stopping parameters
         self.consecutive = None
-        self.overall     = 500
+        self.overall     = 50
         
         # Visualization parameters
         self.model_param_str = self.translate_load_dir()
