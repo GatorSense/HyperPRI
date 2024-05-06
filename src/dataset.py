@@ -285,10 +285,14 @@ class HyperpriDataset(Dataset):
         if self.img_transform is not None:
             img = self.img_transform(img)
 
+            # Normalize the uint8 values...!!! Unsure of whether this is necessary.
+            if img.max() > 10:
+                img = img / 255
+
         torch.set_rng_state(state)
         if self.label_transform is not None:
             label = self.label_transform(label)
-        label = np.array(label) * 255  # Transforms do not preserve Uint label
+        label = np.array(label) * 255  # Transforms do not preserve Uint label (?)
         label = np.where(label > 0, np.ones_like(label), np.zeros_like(label))   # Make nodules/pegs into roots
 
         # print(img.shape, label.shape)

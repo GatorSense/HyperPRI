@@ -24,10 +24,6 @@ class UNet(nn.Module):
     def __init__(self, n_channels, n_classes, bilinear=True,
                  feature_extraction = False, use_attention = False,
                  analyze=False):
-        """
-        Initialize a standard UNET with multiple other options.
-
-        """
         super(UNet, self).__init__()
         self.n_channels = n_channels
         self.n_classes = n_classes
@@ -36,17 +32,23 @@ class UNet(nn.Module):
         self.analyze = analyze
         factor = 2 if bilinear else 1
 
-        self.inc = DoubleConv(n_channels, 64)
-        self.down1 = Down(64, 128)
-        self.down2 = Down(128, 256)
-        self.down3 = Down(256, 512)
-        self.down4 = Down(512, 1024 // factor)
+        starter_dim = 64
+        out1 = starter_dim * 2
+        out2 = starter_dim * 2**2
+        out3 = starter_dim * 2**3
+        out4 = starter_dim * 2**4
+
+        self.inc = DoubleConv(n_channels, starter_dim)
+        self.down1 = Down(starter_dim, out1)
+        self.down2 = Down(out1, out2)
+        self.down3 = Down(out2, out3)
+        self.down4 = Down(out3, out4 // factor)
             
-        self.up1 = Up(1024, 512, bilinear, use_attention=self.use_attention)
-        self.up2 = Up(512, 256, bilinear, use_attention=self.use_attention)
-        self.up3 = Up(256, 128, bilinear, use_attention=self.use_attention)
-        self.up4 = Up(128, 64 * factor, bilinear, use_attention=self.use_attention)
-        self.outc = OutConv(64, n_classes)
+        self.up1 = Up(out4, out3, bilinear, use_attention=self.use_attention)
+        self.up2 = Up(out3, out2, bilinear, use_attention=self.use_attention)
+        self.up3 = Up(out2, out1, bilinear, use_attention=self.use_attention)
+        self.up4 = Up(out1, starter_dim * factor, bilinear, use_attention=self.use_attention)
+        self.outc = OutConv(starter_dim, n_classes)
 
     def forward(self, x):
         x1 = self.inc(x)
@@ -79,6 +81,7 @@ class SpectralUNET(torch.nn.Module):
         self.n_channels = hsi_depth
         self.n_classes = n_classes
 
+        # May be changed if user desires different feature numbers in each layer
         self.layer_feats = [
             bn_feats,
             bn_feats,
@@ -166,21 +169,27 @@ class CubeNET(torch.nn.Module):
         self.first_conv = torch.nn.Conv3d(1, first_depth, kernel_size=(self.depth, 3, 3), padding=(0, 1, 1))
         self.inc = torch.nn.Sequential(
             self.first_conv,
+            torch.nn.BatchNorm3d(first_depth),
             torch.nn.ReLU(inplace=True),
-            torch.nn.BatchNorm3d(first_depth)
+        )
+        # Need to match UNET's starter "DoubleConv" module.
+        self.inc2 = torch.nn.Sequential(
+            torch.nn.Conv2d(first_depth, first_depth, kernel_size=3, padding=1),
+            torch.nn.BatchNorm2d(first_depth),
+            torch.nn.ReLU(inplace=True),
         )
         self.down1 = Down(first_depth, 128)
         self.down2 = Down(128, 256)
         self.down3 = Down(256, 512)
         self.down4 = Down(512, 1024 // factor)
 
-        self.up1 = Up(1024, 512, bilinear, use_attention=self.use_attention)
-        self.up2 = Up(512, 256, bilinear, use_attention=self.use_attention)
-        self.up3 = Up(256, 128, bilinear, use_attention=self.use_attention)
+        self.up1 = Up(1024, 512, self.bilinear, use_attention=self.use_attention)
+        self.up2 = Up(512, 256, self.bilinear, use_attention=self.use_attention)
+        self.up3 = Up(256, 128, self.bilinear, use_attention=self.use_attention)
         if first_depth == 64:
-            self.up4 = Up(128, 64 * factor, bilinear, use_attention=self.use_attention)
+            self.up4 = Up(128, 64 * factor, self.bilinear, use_attention=self.use_attention)
         else:
-            if bilinear:
+            if self.bilinear:
                 self.upsample4 = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
                 self.upconv4 = DoubleConv(128 + first_depth, 64, 64)
             else:
@@ -203,6 +212,7 @@ class CubeNET(torch.nn.Module):
 
         x1 = self.inc(x)
         x1 = x1.reshape((x.shape[0], self.first_conv.out_channels, x_row, x_col))
+        x1 = self.inc2(x1)
         x2 = self.down1(x1)
         x3 = self.down2(x2)
         x4 = self.down3(x3)
