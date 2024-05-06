@@ -21,7 +21,7 @@ class ExpRedGreenBluePRI:
         self.now = datetime.datetime.now()
 
         # Basic definitions -----------------------------------------------
-        self.dataset = "SiTS"
+        self.dataset = "RGB"
         self.b_size  = {'train': 2, 'val': 2, 'test': 1}
         self.device  = 'gpu'
         self.epochs  = 5000
@@ -35,11 +35,11 @@ class ExpRedGreenBluePRI:
         self.rotate      = False
         self.num_classes = 1
         self.label_set   = None   # Set to 'None' for normal root-soil segmentation
-        self.data_dir    = f"{calling_path}/Datasets/SiTS_JSON/"
+        self.data_dir    = f"{calling_path}/Datasets/HyperPRI/"
         self.json_dir    = {
-            'train': f"{self.data_dir}/K_folds/train{split_no}.json",
-            'val': f"{self.data_dir}/K_folds/val{split_no}.json",
-            'test': f"{self.data_dir}/K_folds/val{split_no}.json"
+            'train': f"{self.data_dir}/data_splits/train{split_no}.json",
+            'val': f"{self.data_dir}/data_splits/val{split_no}.json",
+            'test': f"{self.data_dir}/data_splits/val{split_no}.json"
         }
         self.run_num    = 10 * seed_num + split_no  # If deciding to run multiple seeds per data split...
 
@@ -74,15 +74,15 @@ class ExpRedGreenBluePRI:
 
         # Visualization parameters ----------------------------------------
         self.model_param_str = self.translate_load_dir()
-        self.save_path       = f"{calling_path}/Saved_Models/{self.dataset}_finetune/{self.model_param_str}/Run_{self.run_num}/"
-        self.fig_dir         = f"{calling_path}/Saved_Models/{self.dataset}_finetune/Val_Segmentation_Maps/Run_{self.run_num}/{self.model_param_str}/"
+        self.save_path       = f"{calling_path}/Saved_Models/{self.dataset}/{self.model_param_str}/Run_{self.run_num}/"
+        self.fig_dir         = f"{calling_path}/Saved_Models/{self.dataset}/Val_Segmentation_Maps/Run_{self.run_num}/{self.model_param_str}/"
 
         # Comet Logging Parameters ----------------------------------------
         self.comet_params = {
             "api_key": os.environ.get("COMET_API_KEY") if comet_logging else None,
             "workspace": os.environ.get("COMET_WORKSPACE") if comet_logging else None,
             "offline_dir": f"{calling_path}/comet_offline/",
-            "project_name": "sits-finetune",
+            "project_name": "hyperpri",
             "experiment_name": f"{self.dataset}-{self.model_name}-{self.run_num}",
         }
 
@@ -102,8 +102,8 @@ class ExpRedGreenBluePRI:
         self.run_num = 10 * seed_num + split_no
         self.model_name = new_model_name
         self.model_param_str = self.translate_load_dir()
-        self.save_path = f"{calling_path}/Saved_Models/{self.dataset}_finetune/{self.model_param_str}/Run_{self.run_num}/"
-        self.fig_dir   = f"{calling_path}/Saved_Models/{self.dataset}_finetune/Val_Segmentation_Maps/Run_{self.run_num}/{self.model_param_str}/"
+        self.save_path = f"{calling_path}/Saved_Models/{self.dataset}/{self.model_param_str}/Run_{self.run_num}/"
+        self.fig_dir   = f"{calling_path}/Saved_Models/{self.dataset}/Val_Segmentation_Maps/Run_{self.run_num}/{self.model_param_str}/"
 
     def translate_load_dir(self):    #Generate segmentation model
         if self.model_name.lower() in ['unet', 'unet+']:
@@ -189,11 +189,11 @@ class ExpHyperspectralPRI:
         self.rotate      = False
         self.num_classes = 1
         self.label_set   = None   # Set to 'None' for normal root-soil segmentation
-        self.data_dir    = f"{calling_path}/Datasets/SiTS_JSON"
+        self.data_dir    = f"{calling_path}/Datasets/HyperPRI"
         self.json_dir    = {
-            'train': f"{self.data_dir}/K_folds/train{split_no}.json",
-            'val': f"{self.data_dir}/K_folds/val{split_no}.json",
-            'test': f"{self.data_dir}/K_folds/val{split_no}.json"
+            'train': f"{self.data_dir}/data_splits/train{split_no}.json",
+            'val': f"{self.data_dir}/data_splits/val{split_no}.json",
+            'test': f"{self.data_dir}/data_splits/val{split_no}.json"
         }
         self.run_num    = 10 * seed_num + split_no
         self.test_transforms = None
@@ -236,15 +236,15 @@ class ExpHyperspectralPRI:
         
         # Visualization parameters
         self.model_param_str = self.translate_load_dir()
-        self.save_path = f"{calling_path}/Saved_Models/{self.dataset}_finetune/{self.model_param_str}/Run_{self.run_num}/"
-        self.fig_dir   = f"{calling_path}/Saved_Models/{self.dataset}_finetune/Val_Segmentation_Maps/Run_{self.run_num}/{self.model_param_str}/"
+        self.save_path = f"{calling_path}/Saved_Models/{self.dataset}/{self.model_param_str}/Run_{self.run_num}/"
+        self.fig_dir   = f"{calling_path}/Saved_Models/{self.dataset}/Val_Segmentation_Maps/Run_{self.run_num}/{self.model_param_str}/"
 
         # Comet Logging Parameters
         self.comet_params = {
             "api_key": os.environ.get("COMET_API_KEY") if comet_logging else None,
             "workspace": os.environ.get("COMET_WORKSPACE") if comet_logging else None,
             "offline_dir": f"{calling_path}/comet_offline/",
-            "project_name": "sits-finetune",
+            "project_name": "hyperpri",
             "experiment_name": f"{self.dataset}-{self.model_name}-{self.run_num}",
         }
 
@@ -263,8 +263,8 @@ class ExpHyperspectralPRI:
         self.run_num = 10 * seed_num + split_no
         self.model_name = new_model_name
         self.model_param_str = self.translate_load_dir()
-        self.save_path = f"{calling_path}/Saved_Models/{self.dataset}_finetune/{self.model_param_str}/Run_{self.run_num}/"
-        self.fig_dir   = f"{calling_path}/Saved_Models/{self.dataset}_finetune/Val_Segmentation_Maps/Run_{self.run_num}/{self.model_param_str}/"
+        self.save_path = f"{calling_path}/Saved_Models/{self.dataset}/{self.model_param_str}/Run_{self.run_num}/"
+        self.fig_dir   = f"{calling_path}/Saved_Models/{self.dataset}/Val_Segmentation_Maps/Run_{self.run_num}/{self.model_param_str}/"
 
     def translate_load_dir(self):    #Generate segmentation model
         if self.model_name.lower() == 'spectralunet':

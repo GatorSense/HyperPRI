@@ -49,9 +49,9 @@ update_params = {
         'CubeNET',
     ],
     'dataset': [
-        # 'SiTS',
-        'HSI_SitS',
-        'HSI_SitS',
+        # 'RGB',
+        'HSI',
+        'HSI',
     ],
     'criterion': [
         torch.nn.BCEWithLogitsLoss(),
@@ -96,7 +96,7 @@ for run in range(start_split, num_splits):
         for k_idx, k in enumerate(update_params):
             change_params[k] = update_params[k][m_idx]
 
-        if dset.lower() == 'rgbpri':
+        if dset.lower() == 'rgb':
             exp_params = ExpRedGreenBluePRI(rel_call_path, split_no=run+1, augment=TEST_AUG)
             # Switch to a different model (ie. change internal parameter strings)
             exp_params.change_network_param(m, rel_call_path, run+1, model_params=change_params)  # Num bins
