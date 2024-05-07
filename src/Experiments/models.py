@@ -43,7 +43,7 @@ class UNet(nn.Module):
         self.down2 = Down(out1, out2)
         self.down3 = Down(out2, out3)
         self.down4 = Down(out3, out4 // factor)
-            
+
         self.up1 = Up(out4, out3, bilinear, use_attention=self.use_attention)
         self.up2 = Up(out3, out2, bilinear, use_attention=self.use_attention)
         self.up3 = Up(out2, out1, bilinear, use_attention=self.use_attention)
@@ -61,7 +61,7 @@ class UNet(nn.Module):
         x = self.up3(x, x2)
         x = self.up4(x, x1)
         logits = self.outc(x)
-        
+
         if self.analyze:
             return (logits, logits, torch.sigmoid(logits))
         else:
@@ -135,7 +135,7 @@ class SpectralUNET(torch.nn.Module):
             x2 = self.down2(x1)
             x3 = self.down3(x2)
             x4 = self.down4(x3)
-            
+
             tmp_x = self.up1(x4)
             tmp_x = self.up2(torch.cat((x3, tmp_x), axis=-1))
             tmp_x = self.up3(torch.cat((x2, tmp_x), axis=-1))
@@ -222,7 +222,7 @@ class CubeNET(torch.nn.Module):
         x = self.up1(x5, x4)
         x = self.up2(x, x3)
         x = self.up3(x, x2)
-        
+
         # Working with two CubeNET versions
         if self.first_depth == 64:
             x = self.up4(x, x1)
@@ -240,7 +240,7 @@ class CubeNET(torch.nn.Module):
             x = self.upconv4(x)
 
         logits = self.outc(x)
-        
+
         if self.analyze:
             return (logits, logits, torch.sigmoid(logits))
         else:
@@ -252,14 +252,14 @@ def initialize_model(model_name, num_classes, Network_parameters, analyze=False)
     Initializes model based on given model name string and provided parameters
     """
     #Base UNET model or UNET+ (our version of attention)
-    if model_name == 'UNET': 
+    if model_name == 'UNET':
         model = UNet(Network_parameters['channels'], num_classes,
                      bilinear = Network_parameters['bilinear'],
                      feature_extraction = Network_parameters['feature_extraction'],
                      use_attention=Network_parameters['use_attention'],
                      analyze=analyze)
-        
-    elif model_name == 'SpectralUNET': 
+
+    elif model_name == 'SpectralUNET':
         depth = Network_parameters['hsi_hi'] - Network_parameters['hsi_lo']
         model = SpectralUNET(depth, num_classes, bn_feats=Network_parameters['spectral_bn_size'])
 
@@ -288,5 +288,5 @@ def translate_load_dir(model_name, net_params):    #Generate segmentation model
     #Base UNET model
     else:
         model_str = "UNET"
-    
+
     return model_str

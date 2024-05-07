@@ -93,7 +93,7 @@ class HyperpriDataset(Dataset):
         '''
         self.class_count = np.zeros(len(self.class_list), dtype=np.int)
         imgdir = os.path.join(self.root, 'images')
-    
+
         for os_root, dirs, files in os.walk(imgdir):
             curr_class_idx = None
             for class_idx in range(len(self.class_list)):

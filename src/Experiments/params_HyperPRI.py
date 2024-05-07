@@ -156,10 +156,10 @@ class ExpRedGreenBluePRI:
 
         # Create unique identifier for test
         testID = '%d%02d%02d_%02d%02d' % (self.now.year, self.now.month, self.now.day, self.now.hour, self.now.minute)
-        
+
         lrstring = str(self.learningRate).replace('.','-')
         lamstring = str(self.lam).replace('.','-')
-        
+
         testID += '_%s%s_batch%d_lambda%s' % (self.optimizer, lrstring, self.bSize, lamstring)
 
         return testID
@@ -172,7 +172,7 @@ class ExpHyperspectralPRI:
     def __init__(self, calling_path, split_no=1, seed_num=0, comet_logging=True):
         #Define class attributes (actual paramters)
         self.now = datetime.datetime.now()
-        
+
         # Basic definitions
         self.dataset = "HSI_SitS"
         self.b_size  = {'train': 2, 'val': 2, 'test': 2}
@@ -218,7 +218,7 @@ class ExpHyperspectralPRI:
         # Hyperspectral Stuff --------------------
         self.spectral_bn_size = 1650      ## Size of the bottleneck for SpectralUNET
         self.cube_featmaps    = 64        ## How many feature maps are in CubeNET's first layer
-        
+
         # PyTorch required parameters
         self.criterion    = torch.nn.BCEWithLogitsLoss()
         self.optimizer    = "adam"
@@ -229,11 +229,11 @@ class ExpHyperspectralPRI:
         # PyLightning Metrics param's -------------------------------------
         self.task         = "binary"
         self.threshold    = 0.5
-        
+
         # Early Stopping parameters
         self.consecutive = None
         self.overall     = 500
-        
+
         # Visualization parameters
         self.model_param_str = self.translate_load_dir()
         self.save_path = f"{calling_path}/Saved_Models/{self.dataset}/{self.model_param_str}/Run_{self.run_num}/"
@@ -281,7 +281,7 @@ class ExpHyperspectralPRI:
         return model_str
 
     def get_network(self):
-        if self.model_name.lower() == 'spectralunet': 
+        if self.model_name.lower() == 'spectralunet':
             depth = self.hsi_hi - self.hsi_lo
             model = SpectralUNET(depth,
                                  self.num_classes,
@@ -347,10 +347,10 @@ class ExpHyperspectralPRI:
 
         # Create unique identifier for test
         testID = '%d%02d%02d_%02d%02d' % (self.now.year, self.now.month, self.now.day, self.now.hour, self.now.minute)
-        
+
         lrstring = str(self.learningRate).replace('.','-')
         lamstring = str(self.lam).replace('.','-')
-        
+
         testID += '_%s%s_batch%d_lambda%s' % (self.optimizer, lrstring, self.bSize, lamstring)
 
         return testID

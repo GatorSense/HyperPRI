@@ -60,7 +60,7 @@ class Up(nn.Module):
             else:
                 self.conv = DoubleConv(in_channels, out_channels // 2, in_channels // 2)
         else:
-            self.up = nn.ConvTranspose2d(in_channels , in_channels // 2, 
+            self.up = nn.ConvTranspose2d(in_channels , in_channels // 2,
                                              kernel_size=2, stride=2)
             if self.use_attention:
                 self.conv = DoubleConv(in_channels // 2, out_channels)
@@ -85,8 +85,8 @@ class Up(nn.Module):
             x = x2*x1
         else:
             x = torch.cat([x2, x1], dim=1)
-            
-     
+
+
         return self.conv(x)
 
 

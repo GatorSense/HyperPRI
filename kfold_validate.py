@@ -1,5 +1,5 @@
 '''
-validate.py
+kfold_validate.py
 
 File Purpose: Evaluate the best threshold value for fine-tuned
     models using the existing validation dataset
@@ -8,96 +8,122 @@ File Purpose: Evaluate the best threshold value for fine-tuned
 '''
 ## PyTorch dependencies
 import torch
-# import torch.nn as nn
-# from torchvision.transforms import functional as F
 
 ## Python dependencies
 import os
-import random
-import logging
-import numpy as np
 import matplotlib.pyplot as plt
-import pickle
 
-
-## HSI-based dependencies
+## HSI-based dependencies - Remove spectral warnings
 import spectral
-
-# Remove spectral warnings
 spectral.settings.envi_support_nonlowercase_params = True
 
 ## Local external libraries
-from src.create_dataloaders import Get_Dataloaders
-from src.models import initialize_model, translate_load_dir
-from src.prediction_mask import eval_models, model_pr_stats
-from src.save_spreadsheet import fill_metrics_spreadsheet
+from src.Experiments.params_HyperPRI import ExpRedGreenBluePRI, ExpHyperspectralPRI
+from src.PLTrainer import validate_net
 
-## Parameters to set....
+#! Retain information on where the directory actually is relative to the calling file
+rel_call_path = os.path.dirname(os.path.abspath(__file__))
 
-#! Retain information on where the directory actually is
-rel_call_path = os.path.dirname(__file__)
+## GLOBAL Parameters to set....
+RANDOM_STATE = 1
+USE_CUDA = True
+LOAD_CKPT = False
+TEST_AUG = False
+
+n_seeds = 1
+start_split = 0
+num_splits = 5   # Assuming multiple splits
+
+update_params = {
+    'model_name': [
+         'UNET',
+         # 'SpectralUNET',
+        #  'CubeNET',
+    ],
+    'dataset': [
+        'RGB',
+        # 'HSI',
+        # 'HSI',
+    ],
+    'spectral_bn_size': [
+        0,
+        1650,
+        0,
+    ],
+    'cube_featmaps': [
+        0,
+        0,
+        64,
+    ],
+    'criterion': [
+        torch.nn.BCEWithLogitsLoss(),
+        torch.nn.BCEWithLogitsLoss(),
+        torch.nn.BCEWithLogitsLoss(),
+    ]
+}
+models = update_params['model_name']
+datasets = update_params['dataset']
+segmaps = [
+    False,
+    False,
+    False,
+    # True,
+    # True,
+    # True,
+]
+
+plt_colors = [
+    'tab:blue',
+    'tab:orange',
+    'tab:green',
+    'tab:red',
+    'tab:purple',
+]
 
 ## File-specific parameters to set....
 random_state = 1
 use_cuda = True
+print("\n ~~~~~~~~~~ 5-SPLIT CYCLES ~~~~~~~~~~\n")
+plt.figure(dpi=150)
+for run in range(start_split, num_splits):
+    print(f" ********** Split {run+1} **********")
 
-#? List out which models you want to be trained in this particular fine-tuning
-model_list = {
-    'UNET': None,
-    # "SpectralUNET": None,
-    # 'CubeNET': None,
-}
+    for m_idx, (m, dset) in enumerate(zip(models, datasets)):
+        change_params = {}
+        for k_idx, k in enumerate(update_params):
+            change_params[k] = update_params[k][m_idx]
 
-plant_metadata = {
-    'train': f"{rel_call_path}/Datasets/HyperPRI/data_splits/train1.json",
-    'val': f"{rel_call_path}/Datasets/HyperPRI/data_splits/val1.json",
-    'test': f"{rel_call_path}/Datasets/HyperPRI/data_splits/val1.json"
-}
+        for seed_idx in range(n_seeds):  # In case of running multiple random seeds on one split
+            split_no = seed_idx * 10 + run + 1
+            if dset.lower() == 'rgb':
+                exp_params = ExpRedGreenBluePRI(rel_call_path, split_no=run+1, augment=TEST_AUG)
+                # Switch to a different model (ie. change internal parameter strings)
+                exp_params.change_network_param(m, rel_call_path, run+1, model_params=change_params)  # Num bins
+            else:
+                exp_params = ExpHyperspectralPRI(rel_call_path, split_no=run+1)
+                # Switch to a different model (ie. change internal parameter strings)
+                exp_params.change_network_param(m, rel_call_path, run+1, model_params=None)  # Num bins
 
-validate_params = {
-    'dataset': 'HyperPRI',  # Dataset Param's
-    'imgs_dir': f"{rel_call_path}/Datasets/HyperPRI",
-    'json_dir': plant_metadata,
-    'num_workers': 2,
-    'patch_size': (608, 968),
-    'augment': False,
-    'rotate': False,
-    'splits': 5,
-    'batch_size': {'train': 1, 'val': 1, 'test': 1},
-    'num_classes': 1,
-    'pretrain_dir': f"{rel_call_path}/Saved_Models/HyperPRI/",
-    'hsi_lo': 25,   # 450 nm
-    'hsi_hi': 263,  # 926 nm
-    'model_name': 'UNET',  # Model Param's
-    "channels": 3,
-    "spectral_bn_size": 16,
-    "bilinear": False,
-    "feature_extraction": False,
-    "use_attention": False,
-    'hist_size': [2, 2, 2, 2],
-    '3d_featmaps': 64,          # How many feature maps are in 3D_UNET's first layer
-    '3d_levels': 5,            # How many 3D levels
-    '3d_kernel': (9, 3, 3),    # How large the Conv3d kernel is
-    '3d_poolsize': (1, 2, 2),  # How large the Pool3d kernel is
-    '3d_padding': (4, 1, 1),   # Added padding for the Conv3d modules
-    '3d_pooltype': 'max',      # Pick from 'max'pooling or 'avg'pooling
-    'add_bn': False,
-    'parallel_skips': False,
-    'use_pretrained': True,
-    'epochs': 30,  # Optimizer Param's
-    'lr': 1e-5,
-    'optim': 'adam',
-    'wgt_decay': 0,
-    'momentum': 0.9,
-    'early_stop': 5,
-}
 
-device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")  # CPU for temporary code
+            print(f"   Model: {exp_params.model_param_str}")
+            print(f"   Validation JSON: {exp_params.json_dir['val']}")
+            # pr_curve_info = validate_net(exp_params.get_val_data(),
+            pr_curve_info = validate_net(exp_params.get_val_data(),
+                                         exp_params,
+                                         save_segmaps=segmaps[m_idx])
 
-## For however many splits and training runs exist, evaluate the models (using eval_models)
-model_pr_stats(model_list,
-               rel_call_path=rel_call_path,
-               mask_type=bool,
-               device=device,
-               params=validate_params,
-               save_dir=f"{rel_call_path}/Saved_Models/{validate_params['dataset']}_finetune/")
+        # Will plot the last of all potential seeded runs
+        if run == start_split:
+            label_str = f"{exp_params.model_name}"
+        else:
+            label_str = None
+        plt.plot(pr_curve_info[1], pr_curve_info[0], alpha=0.7,
+                 color=plt_colors[m_idx], label=label_str)
+
+curve_str = "_".join(models)
+plt.xlabel("Recall", fontsize=14)
+plt.ylabel("Precision", fontsize=14)
+plt.legend()
+
+plt.savefig(f"{rel_call_path}/Saved_Models/{dset}_finetune/{curve_str}_pr.png")
+plt.show()

@@ -23,7 +23,6 @@ from lightning.pytorch.strategies import FSDPStrategy
 from torchmetrics import Accuracy, JaccardIndex, Dice, PrecisionRecallCurve, AveragePrecision
 from torchmetrics.classification import BinaryConfusionMatrix
 
-from .PL_EarlyStopper import FullEarlyStopping
 from .Experiments.models import *
 
 
@@ -55,8 +54,6 @@ class RootLightningModel(pl.LightningModule):
         self.p_learn_rate = params.learn_rate
         self.p_decay = params.weight_decay
         self.p_momentum = params.momentum
-        # self.p_lambda = params.lam
-        # self.p_sched_int = params.sched_interval
 
         self.f_criterion = params.criterion
         self.m_network = params.get_network()
@@ -78,14 +75,6 @@ class RootLightningModel(pl.LightningModule):
 
         # Testing predictions and values
         self.predict_labels = []
-
-    def on_train_start(self) -> None:
-
-        for logger in self.loggers:
-            if isinstance(logger, CometLogger):
-                self.comet_logger = logger
-
-        return super().on_train_start()
 
     def training_step(self, batch, batch_idx):
         mask = batch['mask'].to(torch.int32)
@@ -150,12 +139,6 @@ class RootLightningModel(pl.LightningModule):
 
         return pred
 
-    def test_step(self, batch, batch_idx):
-        pass
-
-    def on_test_end(self):
-        pass
-
     def configure_optimizers(self):
 
         # Get all network modules
@@ -192,7 +175,7 @@ def consolidate_deepspeed_two(ckpt_path):
         temp_path = "./"
         convert_zero_checkpoint_to_fp32_state_dict(temp_path, "deepspeed.ckpt")
         os.chdir(cwd)
-        
+
         dszero_state_dict = torch.load(os.path.join(ckpt_path, "deepspeed.ckpt"), map_location='cpu')
         state_dict = {}
         for key_wgt in dszero_state_dict:
@@ -236,7 +219,7 @@ def eval_color_segmaps(batch_img, batch_name, batch_pred, batch_mask, exp_params
 
         # Single prediction image
         pred = (torch.sigmoid(pred) > threshold).float()
-        
+
         #Plot masks only
         M, N = pred.shape[-2], pred.shape[-1]
         temp_overlap = np.zeros((M, N, 3))
@@ -244,7 +227,7 @@ def eval_color_segmaps(batch_img, batch_name, batch_pred, batch_mask, exp_params
         gt_mask = true_mask.numpy().astype(dtype=bool)
         temp_overlap[:,:,0] = preds_mask
         temp_overlap[:,:,1] = gt_mask
-        
+
         #Convert to color blind
         #Output
         temp_overlap[preds_mask,:] = [202/255, 0/255, 32/255]  # Red
@@ -339,7 +322,6 @@ def train_net(params, checkpoint=None, model_parallel:bool=False):
 
     # Create early stopper pytorch lightning callback
     ES = EarlyStopping('val_loss', patience=params.overall, check_on_train_epoch_end=True, verbose=True)
-    # ES = FullEarlyStopping('val_loss', mode='min', consecutive=params.consecutive, overall=params.overall)
 
     # Create callback to save top 10 best models from training
     MCK = ModelCheckpoint(monitor='val_loss', mode='min', save_last=True, save_top_k=1, save_weights_only=False,
@@ -615,7 +597,7 @@ def test_net(test_data, params, best_threshold, pl_trainer=None, save_segmaps=Fa
 
     if pl_trainer is None:
         pl_trainer = pl.Trainer(accelerator=params.device, devices=1, inference_mode=True)
-    
+
     # Assumed to be after a training cycle
     preds = pl_trainer.predict(pl_model, test_loader, return_predictions=True)
 
