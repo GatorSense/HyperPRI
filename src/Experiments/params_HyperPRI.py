@@ -174,7 +174,7 @@ class ExpHyperspectralPRI:
         self.now = datetime.datetime.now()
 
         # Basic definitions
-        self.dataset = "HSI_SitS"
+        self.dataset = "HSI"
         self.b_size  = {'train': 2, 'val': 2, 'test': 2}
         self.device  = 'gpu'
         self.epochs  = 2000
@@ -206,7 +206,7 @@ class ExpHyperspectralPRI:
             self.gt_transforms = [transforms.ToTensor()]
 
         # Model Parameters
-        self.model_name         = "CubeNET"
+        self.model_name         = "SpectralUNET"
         self.bilinear           = False
         self.use_attention      = False
         self.use_pretrained     = False

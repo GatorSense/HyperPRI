@@ -125,5 +125,5 @@ plt.xlabel("Recall", fontsize=14)
 plt.ylabel("Precision", fontsize=14)
 plt.legend()
 
-plt.savefig(f"{rel_call_path}/Saved_Models/{dset}_finetune/{curve_str}_pr.png")
+plt.savefig(f"{rel_call_path}/Saved_Models/{dset}/{curve_str}_pr.png")
 plt.show()
