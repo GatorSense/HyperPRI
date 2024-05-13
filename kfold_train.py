@@ -52,7 +52,7 @@ if __name__ == "__main__":
     ## GLOBAL Parameters to set....
     RANDOM_STATE = 1
     USE_CUDA = True
-    MODEL_SHARD = False   # Use DeepZeRO to parallelize model
+    MODEL_SHARD = False   # SpectralUNET: Use DeepZeRO-2 to parallelize model
     LOAD_CKPT = False  # Assumes that the `start_split` index will load while subsequent will not.
     DATA_AUG = False
 

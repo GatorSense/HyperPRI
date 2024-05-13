@@ -110,8 +110,8 @@ class SpectralUNET(torch.nn.Module):
             )
         return torch.nn.Sequential(
             torch.nn.Linear(in_feats, out_feats),
+            torch.nn.BatchNorm1d(out_feats),
             torch.nn.ReLU(),
-            torch.nn.BatchNorm1d(out_feats)
         )
 
     def forward(self, x):

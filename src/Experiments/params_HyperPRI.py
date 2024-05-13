@@ -180,7 +180,7 @@ class ExpHyperspectralPRI:
         self.epochs  = 2000
 
         # Dataset Definitions - largest size is 267 MB
-        self.patch_size  = (608, 968)
+        self.patch_size  = (608, 968)  # Full size = (608, 968)
         self.hsi_lo      = 25
         self.hsi_hi      = 263
         self.channels    = 238   # may depend on which model is being used
@@ -206,14 +206,14 @@ class ExpHyperspectralPRI:
             self.gt_transforms = [transforms.ToTensor()]
 
         # Model Parameters
-        self.model_name         = "SpectralUNET"
+        self.model_name         = "CubeNET"
         self.bilinear           = False
         self.use_attention      = False
         self.use_pretrained     = False
 
         # DeepSpeed Testing Parameters
         self.mlp_layers         = [1650] * 10
-        self.test_deepspeed     = False
+        self.test_deepspeed     = False   ## If we wish to attempt training w/DeepSpeed-ZeRO-3
 
         # Hyperspectral Stuff --------------------
         self.spectral_bn_size = 1650      ## Size of the bottleneck for SpectralUNET

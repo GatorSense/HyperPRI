@@ -37,13 +37,13 @@ num_splits = 5   # Assuming multiple splits
 update_params = {
     'model_name': [
          'UNET',
-         # 'SpectralUNET',
-        #  'CubeNET',
+         'SpectralUNET',
+         'CubeNET',
     ],
     'dataset': [
         'RGB',
-        # 'HSI',
-        # 'HSI',
+        'HSI',
+        'HSI',
     ],
     'spectral_bn_size': [
         0,
@@ -64,12 +64,12 @@ update_params = {
 models = update_params['model_name']
 datasets = update_params['dataset']
 segmaps = [
-    False,
-    False,
-    False,
-    # True,
-    # True,
-    # True,
+    # False,
+    # False,
+    # False,
+    True,
+    True,
+    True,
 ]
 
 plt_colors = [

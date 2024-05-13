@@ -211,7 +211,7 @@ def eval_color_segmaps(batch_img, batch_name, batch_pred, batch_mask, exp_params
 
         print(f"Saving {img_name}...")
         print(f"   Image Shape: {img.shape}")
-        if exp_params.dataset.lower() == "hsi_sits":
+        if exp_params.dataset.lower() == "hsi":
             # Assuming hsi indices [25, 263] == [~450nm, ~926nm]
             hsi_rgb = [125, 49, 0]  # R - 700nm, G - 546nm, B - 436nm
             color_correction = img[hsi_rgb, :, :]**(1 / 2.2)  # Gamma correction
@@ -398,6 +398,7 @@ def train_net(params, checkpoint=None, model_parallel:bool=False):
         else:
             strat = "deepspeed_stage_2"
 
+        print(f"Parallelism Strat: {strat}")
         pl_trainer = pl.Trainer(max_epochs=params.epochs,
                                 accelerator="gpu",
                                 num_nodes=1,
