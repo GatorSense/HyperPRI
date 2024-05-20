@@ -64,12 +64,12 @@ update_params = {
 models = update_params['model_name']
 datasets = update_params['dataset']
 segmaps = [
-    # False,
-    # False,
-    # False,
-    True,
-    True,
-    True,
+    False,
+    False,
+    False,
+    # True,
+    # True,
+    # True,
 ]
 
 plt_colors = [

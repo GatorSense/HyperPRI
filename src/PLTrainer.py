@@ -508,6 +508,9 @@ def validate_net(val_data, params, pl_trainer:pl.Trainer=None, save_segmaps=Fals
         pl_trainer = pl.Trainer(accelerator=params.device, devices=1, inference_mode=True)
     # Assumed to be after a training cycle
     preds = pl_trainer.predict(pl_model, val_loader, return_predictions=True)
+    print("   Binary Cross-Entropy...")
+    bce_loss = params.criterion(torch.cat(preds, dim=0).flatten(),
+                                   torch.cat(pl_model.predict_labels, dim=0).flatten())
 
     # Produce the plots...
     model_preds = torch.sigmoid(torch.cat(preds, dim=0).flatten())
@@ -538,6 +541,7 @@ def validate_net(val_data, params, pl_trainer:pl.Trainer=None, save_segmaps=Fals
 
     binary_seg = 1. * (model_preds > best_threshold)
     best_acc = acc_calc(binary_seg, batch_masks)
+    print(f"      BCE Loss : {bce_loss:.3f}")
     print(f"      Pixel Acc: {best_acc:.3f}")
     print(f"      Precision: {curve_prec:.3f}")
     print(f"      Recall   : {curve_recall:.3f}")
