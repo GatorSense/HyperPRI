@@ -1,0 +1,33 @@
+name: hyperpri
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+  - https://repo.anaconda.com/pkgs/main
+  - https://repo.anaconda.com/pkgs/free
+dependencies:
+  - python=3.10
+  - conda=23.7.3
+  - numpy
+  - scipy
+  - scikit-learn
+  - pillow
+  - scikit-image
+  - ca-certificates
+  - certifi
+  - openssl
+  - matplotlib
+  - cudatoolkit=11.8
+  - pytorch
+  - torchvision
+  - torchaudio
+  - pytorch-cuda=11.8
+  - comet_ml
+  - spectral
+  - h5py
+  - tensorboard
+  - lightning=2.0.7
+  - opencv
+  - torchmetrics=1.2.0
+  - gh
+  - ipykernel
