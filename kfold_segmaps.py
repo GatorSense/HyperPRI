@@ -44,12 +44,12 @@ num_splits = 5   # Assuming multiple splits
 
 update_params = {
     'model_name': [
-        # 'UNET',
+        'UNET',
         'SpectralUNET',
         'CubeNET',
     ],
     'dataset': [
-        # 'RGB',
+        'RGB',
         'HSI',
         'HSI',
     ],
@@ -59,13 +59,15 @@ update_params = {
         torch.nn.BCEWithLogitsLoss(),  # Need to handle previous changes to the code
     ]
 }
-thresholds = [
-    # [0.36, 0.37, 0.38, 0.39, 0.45],   # UNET
-    [0.30, 0.40, 0.43, 0.37, 0.34],   # SpectralUNET
-    [0.38, 0.41, 0.47, 0.48, 0.42],   # CubeNET
+
+thresholds = [  # Thresholds when reproducing with HyperPRI - 05/2024
+    [0.36, 0.41, 0.42, 0.56, 0.38],   # UNET
+    [0.45, 0.39, 0.48, 0.36, 0.28],   # SpectralUNET
+    [0.33, 0.46, 0.39, 0.46, 0.27],   # CubeNET
 ]
+
 segmaps = [
-    #True,
+    True,
     True,
     True,
     # False,
@@ -73,7 +75,7 @@ segmaps = [
 ]
 models = update_params['model_name']
 datasets = update_params['dataset']
-testing_set = 'val'
+testing_set = 'test'
 
 plt_colors = [
     'tab:blue',
@@ -104,6 +106,8 @@ for run in range(start_split, num_splits):
             exp_params = ExpHyperspectralPRI(rel_call_path, split_no=run+1)
             # Switch to a different model (ie. change internal parameter strings)
             exp_params.change_network_param(m, rel_call_path, run+1)  # Num bins
+
+        exp_params.json_dir['test'] = os.path.join(f"{exp_params.data_dir}", "data_splits", "test.json")
 
         print(f"   Model: {exp_params.model_param_str}")
         print(f"   Test JSON: {exp_params.json_dir[testing_set]}")

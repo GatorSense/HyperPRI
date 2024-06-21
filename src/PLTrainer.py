@@ -117,6 +117,28 @@ class RootLightningModel(pl.LightningModule):
         self.log('val_dice', dice, on_step=False, on_epoch=True, sync_dist=True, prog_bar=True)
         self.log('val_pos_iou', pos_iou, on_step=False, on_epoch=True, sync_dist=False, prog_bar=False)
 
+    def test_step(self, batch, batch_idx):
+        mask = batch['mask'].to(torch.int32)
+
+        if hasattr(self.m_network, "analyze") and self.m_network.analyze:
+            pred, _ = self.m_network(batch['image'])
+        else:
+            pred = self.m_network(batch['image'])
+
+        loss = self.f_criterion(pred, batch['mask'])
+
+        seg = torch.sigmoid(pred.detach()) > self.threshold 
+        acc = self.accuracy(seg, mask)
+        dice = self.dice_val(seg, mask)
+        pos_iou = self.pos_iou(seg, mask)
+
+        self.log('test_loss', loss, on_step=False, on_epoch=True, sync_dist=True)
+        self.log('test_acc', acc, on_step=False, on_epoch=True, sync_dist=False, prog_bar=False)
+        self.log('test_dice', dice, on_step=False, on_epoch=True, sync_dist=True, prog_bar=True)
+        self.log('test_pos_iou', pos_iou, on_step=False, on_epoch=True, sync_dist=False, prog_bar=False)
+
+        return pred
+
     def predict_step(self, batch, batch_idx, dataloader_idx=0):
 
         self.predict_labels.append(batch['mask'].cpu())
@@ -595,7 +617,7 @@ def test_net(test_data, params, best_threshold, pl_trainer=None, save_segmaps=Fa
         test_loader = DataLoader(test_data, batch_size=params.b_size['test'], shuffle=False)
     else:
         test_loader = DataLoader(test_data, batch_size=params.b_size['test'], shuffle=False,
-                                 num_workers=2, persistent_workers=True)
+                                 num_workers=1, persistent_workers=True)
     pl_model = load_val_model(params)
     pl_model.save_segmaps = save_segmaps
     pl_model.threshold = best_threshold

@@ -148,7 +148,7 @@ class ExpRedGreenBluePRI:
                                img_transform=transforms.Compose(self.test_transforms),
                                label_transform=transforms.Compose(self.gt_test_transforms),
                                subset=self.label_set,
-                               json_file=self.json_dir.get("test", None)
+                               json_file=self.json_dir.get("test", None),
         )
 
     def get_test_id(self):
