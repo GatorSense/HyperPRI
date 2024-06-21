@@ -8,6 +8,7 @@ This Github Repo contains source code used to demonstrate how the hyperspectral 
 [HyperPRI Dataset](https://doi.org/10.7910/DVN/MAYDHT)
 - Oct-15-2023: Initial upload/release of dataset
 - Mar-25-2024: Included hyperspectral data for the viewing pane's material (Lexan)
+- Jun-21-2024: Set aside rhizobox 40 as test data (dates: Aug-15 and Aug-24)
 
 Preprint: [bioRxiv 2023.09.29.559614v3](https://www.biorxiv.org/content/10.1101/2023.09.29.559614v3)
 
@@ -80,11 +81,20 @@ For any issues and additional questions, please direct them to [changspencer](ht
 
 *SpectralUNET Training:* To train SpectralUNET with 1650 neurons in each layer with our coding setup and memory constraints, we had to randomly crop the hyperspectral cubes' height and width to $608\times 700$. We expect that even if the additional 268 width-wise pixels were included, the model's performance would still be subpar compared to UNET and CubeNET.
 
+**Validation Data**
 |Metric|UNET|SpectralUNET|CubeNET-64|
 | :---: | :---: | :---: | :---: |
 | **BCE Loss** | 0.080 (0.015) | 0.146 (0.022) | **0.077 (0.014)** |
 | **DICE**     | 0.838 (0.015) | 0.717 (0.044) | **0.844 (0.013)** |
 | **+IOU**     | 0.721 (0.022) | 0.561 (0.053) | **0.730 (0.019)** |
 | **AP**       | 0.919 (0.013) | 0.781 (0.048) | **0.923 (0.012)** |
+
+**Test Data**
+|Metric|UNET|SpectralUNET|CubeNET-64|
+| :---: | :---: | :---: | :---: |
+| **Pix Acc**  | 0.733 (0.123) | 0.751 (0.114) | **0.898 (0.134)** |
+| **DICE**     | 0.162 (0.053) | 0.161 (0.064) | **0.471 (0.206)** |
+| **+IOU**     | 0.089 (0.031) | 0.089 (0.039) | **0.329 (0.163)** |
+| **AP**       | 0.226 (0.079) | 0.220 (0.083) | **0.610 (0.109)** |
 
 *Note:* Metrics shown are the mean across all splits with standard deviation in parentheses. Dataset splits are described in the JSON files located at the dataset URL above.
