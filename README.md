@@ -50,8 +50,8 @@ The primary Python packages used are [PyTorch](https://pytorch.org/), [PyTorch L
     - Additional instructions for using the YAML file may be found on the [Conda site](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file).
 
 1. Dataset directory setup. The full directory path from the base `HyperPRI/` repository is `Datasets/HyperPRI/`.
-    - If using, place the JSON/CSV splits data in a `data_splits` subdirectory.
-    - Per plant type (eg. Peanut, Sweet Corn), place them in a `{Peanut, SweetCorn}_968x608` subdirectory which hosts 3 of its own subdirectories: `hsi_files`, `mask_files`, and `rgb_files`. As the names suggest, the HSI `.dat` and `.hdr` files should be in `hsi_files`, and the PNG mask/image files should be in the `mask_files` and `rgb_files` subdirectories, respectively.
+    - If using, place the JSON/CSV splits data in a `Datasets/HyperPRI/data_splits` subdirectory.
+    - Per plant type (eg. Peanut, Sweet Corn), place them in a `Datasets/HyperPRI/{Peanut, SweetCorn}_968x608` subdirectory which hosts 3 of its own subdirectories: `hsi_files`, `mask_files`, and `rgb_files`. As the names suggest, the HSI `.dat` and `.hdr` files should be in `hsi_files`, and the PNG mask/image files should be in the `mask_files` and `rgb_files` subdirectories, respectively.
       - Please note that the paper only used a `Peanut_968x608` subdirectory.
 
 1. Across all model training, the following holds:
