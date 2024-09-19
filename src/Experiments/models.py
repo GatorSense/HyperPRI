@@ -1,5 +1,5 @@
 """
-File composed of all learning models' class declarations.
+File composed of all learning models' class declarations and parts/modules.
 
 Takes after previous code by jpeeples67 in https://github.com/GatorSense/Histological_Segmentation
 
@@ -7,17 +7,9 @@ Takes after previous code by jpeeples67 in https://github.com/GatorSense/Histolo
 """
 
 ## PyTorch dependencies
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch
-
-from .model_parts import *
-
-
-def set_parameter_requires_grad(model, feature_extraction):
-    if feature_extraction:
-        for param in model.parameters():
-            param.requires_grad = False
 
 
 class UNet(nn.Module):
@@ -247,46 +239,89 @@ class CubeNET(torch.nn.Module):
             return logits
 
 
-def initialize_model(model_name, num_classes, Network_parameters, analyze=False):
-    """
-    Initializes model based on given model name string and provided parameters
-    """
-    #Base UNET model or UNET+ (our version of attention)
-    if model_name == 'UNET':
-        model = UNet(Network_parameters['channels'], num_classes,
-                     bilinear = Network_parameters['bilinear'],
-                     feature_extraction = Network_parameters['feature_extraction'],
-                     use_attention=Network_parameters['use_attention'],
-                     analyze=analyze)
+class DoubleConv(nn.Module):
+    """(convolution => [BN] => ReLU) * 2"""
 
-    elif model_name == 'SpectralUNET':
-        depth = Network_parameters['hsi_hi'] - Network_parameters['hsi_lo']
-        model = SpectralUNET(depth, num_classes, bn_feats=Network_parameters['spectral_bn_size'])
+    def __init__(self, in_channels, out_channels, mid_channels=None):
+        super().__init__()
+        if not mid_channels:
+            mid_channels = out_channels
+        self.double_conv = nn.Sequential(
+            nn.Conv2d(in_channels, mid_channels, kernel_size=3, padding=1),
+            nn.BatchNorm2d(mid_channels),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(mid_channels, out_channels, kernel_size=3, padding=1),
+            nn.BatchNorm2d(out_channels),
+            nn.ReLU(inplace=True),
+        )
 
-    elif model_name == 'CubeNET':
-        depth = Network_parameters['hsi_hi'] - Network_parameters['hsi_lo']
-        model = CubeNET(depth, num_classes, first_depth=Network_parameters['3d_featmaps'],
-                        bilinear = Network_parameters['bilinear'],
-                        use_attention=Network_parameters['use_attention'],
-                        analyze=analyze)
-
-    else: #Show error that segmentation model is not available
-        raise RuntimeError('Invalid model')
-
-    return model
+    def forward(self, x):
+        return self.double_conv(x)
 
 
-def translate_load_dir(model_name, net_params):    #Generate segmentation model
-    """
-    Translate the model name into a directory path that can be used when cross-validating
-        multiple models.
-    """
-    if model_name == 'SpectralUNET':
-        model_str = f"{model_name}_{net_params['spectral_bn_size']}"
-    elif model_name == 'CubeNET':
-        model_str = f"{model_name}_{net_params['3d_featmaps']}"
-    #Base UNET model
-    else:
-        model_str = "UNET"
+class Down(nn.Module):
+    """Downscaling with maxpool then double conv"""
 
-    return model_str
+    def __init__(self, in_channels, out_channels):
+        super().__init__()
+        self.maxpool_conv = nn.Sequential(
+            nn.MaxPool2d(2),
+            DoubleConv(in_channels, out_channels)
+        )
+
+    def forward(self, x):
+        return self.maxpool_conv(x)
+
+
+class Up(nn.Module):
+    """Upscaling then double conv"""
+
+    def __init__(self, in_channels, out_channels, bilinear=True, use_attention=False):
+        super().__init__()
+
+        self.use_attention = use_attention
+        # if bilinear, use the normal convolutions to reduce the number of channels
+        if bilinear:
+            self.up = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
+            if self.use_attention:
+                self.conv = DoubleConv(in_channels // 2, out_channels // 2, in_channels // 2)
+            else:
+                self.conv = DoubleConv(in_channels, out_channels // 2, in_channels // 2)
+        else:
+            self.up = nn.ConvTranspose2d(in_channels , in_channels // 2,
+                                             kernel_size=2, stride=2)
+            if self.use_attention:
+                self.conv = DoubleConv(in_channels // 2, out_channels)
+            else:
+                self.conv = DoubleConv(in_channels, out_channels)
+
+
+    def forward(self, x1, x2):
+        x1 = self.up(x1)
+        # input is CHW
+        diffY = torch.tensor([x2.size()[2] - x1.size()[2]])
+        diffX = torch.tensor([x2.size()[3] - x1.size()[3]])
+
+        x1 = F.pad(x1, [torch.div(diffX, 2, rounding_mode='floor'),
+                        diffX - torch.div(diffX, 2, rounding_mode='floor'),
+                        torch.div(diffY, 2, rounding_mode='floor'),
+                        diffY - torch.div(diffY, 2, rounding_mode='floor')])
+        # if you have padding issues, see
+        # https://github.com/HaiyongJiang/U-Net-Pytorch-Unstructured-Buggy/commit/0e854509c2cea854e247a9c615f175f76fbb2e3a
+        # https://github.com/xiaopeng-liao/Pytorch-UNet/commit/8ebac70e633bac59fc22bb5195e513d5832fb3bd
+        if self.use_attention:
+            x = x2*x1
+        else:
+            x = torch.cat([x2, x1], dim=1)
+
+
+        return self.conv(x)
+
+
+class OutConv(nn.Module):
+    def __init__(self, in_channels, out_channels):
+        super(OutConv, self).__init__()
+        self.conv = nn.Conv2d(in_channels, out_channels, kernel_size=1)
+
+    def forward(self, x):
+        return self.conv(x)
